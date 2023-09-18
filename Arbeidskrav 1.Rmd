@@ -1,0 +1,85 @@
+---
+title: "Arbeidskrav 1"
+author: "Håvard Chramer"
+date: "2023-09-18"
+output: pdf_document
+---
+
+## Oppgave 1:
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(scales)
+
+url <- "https://raw.githubusercontent.com/uit-sok-2013-h23/Data_Arbeidskrav_1/main/datasett1.csv"
+
+data <- read.csv(url)
+
+data1 <- data %>% group_by(LOCATION) %>% 
+  mutate(XM=EXP+IMP) %>% 
+  mutate(oppenness=XM/gdp)
+head(data1)
+
+data1 %>% filter(LOCATION=="NOR")
+```
+1. Fra tabellen er det tydelige tegn på at Norge har en reduksjon i openness i perioden 2018 til 2021. Tallene for eksport har vært stabile, importallene har en liten reduksjon samtidig som den totale BNPen har økt betydelig.
+
+2.
+```{r warning=FALSE}
+data2020 <- data1 %>% filter(TIME==2020) %>% 
+  mutate(gdp_pc=gdp/pop)
+
+ggplot(data2020, aes(x = gdp_pc, y = oppenness)) +
+  geom_point() +
+  geom_text(aes(label=LOCATION), check_overlap= TRUE, size=3, nudge_y =0.07) +
+  labs(x = "BNP per capita",
+       y = "Openness") +
+  scale_x_continuous(labels = comma) +
+  geom_smooth(method = lm, formula =  y ~ x + I(x^2))
+```
+ 
+3. 
+
+```{r warning=FALSE}
+ggplot(data2020, aes(x = log(gdp_pc), y = oppenness)) +
+  geom_point() +
+  geom_text(aes(label=LOCATION), check_overlap= TRUE, size=3, nudge_y =0.07) +
+  labs(x = "Log BNP per capita",
+       y = "Openness") +
+  scale_x_continuous(labels = comma) +
+  geom_smooth(method = lm, formula =  y ~ x + I(x^2))
+```
+
+## Oppgave 2.
+
+```{r}
+url2 <- "https://raw.githubusercontent.com/uit-sok-2013-h23/Data_Arbeidskrav_1/main/datasett2.csv"
+
+data2 <- read.csv(url2)
+```
+
+1. 
+```{r warning=FALSE}
+ggplot(data2, aes(x= simil_index, y= overlap)) +
+  geom_point() +
+  geom_text(aes(label=pcode), check_overlap= TRUE, size=3, nudge_y =0.03) +
+  labs(x = "Simil index",
+       y = "Overlap") +
+  geom_smooth(method = lm, formula =  y ~ x + I(x^2))
+```
+
+2. 
+```{r warning=FALSE}
+countries <- c("NOR", "DNK", "FIN", "SWE")
+
+countryfilter <- data2[data2$pcode %in% countries,]
+
+ggplot(data2, aes(x= simil_index, y= overlap)) +
+  geom_point() +
+  geom_text(data = countryfilter, aes(label = pcode), size = 4, hjust = 0, vjust = 1) +
+  labs(x = "Simil index",
+       y = "Overlap") +
+  geom_smooth(method = lm, formula =  y ~ x + I(x^2))
+```
+
